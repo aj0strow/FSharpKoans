@@ -54,12 +54,47 @@ module ``about the stock example`` =
           "2012-03-01,31.93,32.39,31.85,32.29,77344100,32.29";
           "2012-02-29,31.89,32.00,31.61,31.74,59323600,31.74"; ]
     
+    let parseFloat (input:string) =
+        System.Double.Parse(input)
+
+    [<Koan>]
+    let ParsingFloats() =
+        let result = parseFloat "31.74"
+        AssertEquality result 31.74        
+
+    let splitCommas (csv:string) =
+       csv.Split([| ',' |])
+
+    [<Koan>]
+    let SplittingCsvIntoFields() =
+        let result = splitCommas "Date,Open,High,Low,Close,Volume,Adj Close"
+        AssertEquality result ["Date"; "Open"; "High"; "Low"; "Close"; "Volume"; "Adj Close"]
+
+    let parseStockData (csv:string) =
+        let fields = splitCommas csv
+        let date = fields.[0]
+        let open' = parseFloat fields.[1]
+        let close = parseFloat fields.[4]
+        (date, open', close)
+
+    [<Koan>]
+    let ParsingStockData() =
+        let result = parseStockData "2012-03-30,32.40,32.41,32.04,32.26,31749400,32.26"
+        AssertEquality result ("2012-03-30", 32.4, 32.26)
+
+    let variance x y =
+        abs (x - y)
+
     // Feel free to add extra [<Koan>] members here to write
     // tests for yourself along the way. You can also try 
     // using the F# Interactive window to check your progress.
 
     [<Koan>]
     let YouGotTheAnswerCorrect() =
-        let result =  __
-        
+        let result =
+            List.tail stockData
+            |> List.map parseStockData
+            |> List.maxBy (fun (_, open', close) -> variance open' close)
+            |> fun (date, _, _) -> date
+
         AssertEquality "2012-03-13" result
